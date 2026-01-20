@@ -1,5 +1,5 @@
-gitLFS-Test\.vs\
-gitLFS-Test\build\
+gitLFS-Test/.vs/
+gitLFS-Test/build/
 
 # Prerequisites
 *.d
