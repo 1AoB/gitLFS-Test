@@ -1,0 +1,2 @@
+lib/Debug/addlib.lib filter=lfs diff=lfs merge=lfs -text
+lib/Release/addlib.lib filter=lfs diff=lfs merge=lfs -text
