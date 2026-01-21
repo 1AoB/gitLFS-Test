@@ -5,12 +5,15 @@
 
 name: MSBuild
 
+#触发条件：push 或 PR(请求合并) 到 main 分支时运行
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+#SOLUTION_FILE_PATH 指向 .sln
+#BUILD_CONFIGURATION: VS 里下拉选择的 Release
 env:
   # Path to the solution file relative to the root of the project.
   #SOLUTION_FILE_PATH: .
@@ -24,16 +27,32 @@ env:
 permissions:
   contents: read
 
+# 步骤：
+# actions/checkout@v4：拉取仓库代码（默认不包含 LFS，如果有大文件可改成 with: lfs: true）。
+# microsoft/setup-msbuild@v1.0.2：把 MSBuild 加入 PATH，方便后续命令。
+# nuget restore ...：根据 .sln/.vcxproj 里的包引用下载 NuGet 包（若项目不依赖 NuGet，可去掉或改用 msbuild /t:Restore）。
+# msbuild /m /p:Configuration=Release ...：用 MSBuild 编译解决方案，/m 开多核，Release 配置。
 jobs:
   build:
+    #windows-latest runner：GitHub 提供的托管 Windows 虚机映像（当前通常是 Windows Server 2022），预装 VS Build Tools、.NET、PowerShell 等。
+    #工作流里的所有命令都在这台临时机器上执行，跑完就销毁
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
 
+    # 静态检查（可选）：使用 cppcheck，对 src/include 做基础缺陷扫描
+    - name: Install cppcheck
+      run: choco install -y cppcheck
+
+    - name: Lint with cppcheck
+      run: |
+        cppcheck --enable=all --inconclusive --std=c++17 --force --suppress=missingIncludeSystem gitLFS-Test/src gitLFS-Test/include
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
+    #GITHUB_WORKSPACE 是 GitHub Actions 默认提供的环境变量，无需在 workflow 里设置
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
