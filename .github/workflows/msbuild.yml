@@ -41,6 +41,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # 静态检查（可选）：使用 MSBuild 内置警告检查
+    - name: Lint with MSBuild warnings
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:WarningLevel=4 ${{env.SOLUTION_FILE_PATH}}
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
