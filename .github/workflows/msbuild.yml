@@ -42,16 +42,21 @@ jobs:
     - uses: actions/checkout@v4
 
     # 静态检查（可选）：使用 cppcheck，对 src/include 做基础缺陷扫描
-    - name: Install cppcheck
-      run: choco install -y cppcheck
+    - name: Download cppcheck portable
+      run: |
+        $version = "2.14.2"
+        $zip = "cppcheck-$version-x64.zip"
+        Invoke-WebRequest "https://github.com/danmar/cppcheck/releases/download/$version/$zip" -OutFile $zip
+        Expand-Archive $zip -DestinationPath cppcheck-portable
 
     - name: Lint with cppcheck
       run: |
-        $cfg = Get-ChildItem -Recurse -Filter std.cfg 'C:\ProgramData\chocolatey\lib\cppcheck' | Select-Object -First 1
-        if (-not $cfg) { Write-Error 'std.cfg not found; cppcheck installation looks broken.'; exit 1 }
-        $env:CPPCHECKDATA = $cfg.DirectoryName
-        Write-Host "Using CPPCHECKDATA=$env:CPPCHECKDATA"
-        cppcheck --enable=all --inconclusive --std=c++17 --force --suppress=missingIncludeSystem gitLFS-Test/src gitLFS-Test/include
+        $cppcheck = Get-ChildItem -Recurse -Filter cppcheck.exe cppcheck-portable | Select-Object -First 1
+        if (-not $cppcheck) { Write-Error 'cppcheck.exe not found'; exit 1 }
+        $cfg = Join-Path $cppcheck.Directory "cfg"
+        if (-not (Test-Path (Join-Path $cfg "std.cfg"))) { Write-Error "std.cfg not found in $cfg"; exit 1 }
+        $env:CPPCHECKDATA = $cfg
+        & $cppcheck.FullName --enable=all --inconclusive --std=c++17 --force --suppress=missingIncludeSystem gitLFS-Test/src gitLFS-Test/include
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
