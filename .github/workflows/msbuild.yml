@@ -47,11 +47,11 @@ jobs:
 
     - name: Lint with cppcheck
       run: |
-        cppcheck ^
-          --enable=all --inconclusive --std=c++17 --force ^
-          --library=std ^
-          --library=qt ^
-          --suppress=missingIncludeSystem ^
+        cppcheck `
+          --enable=all --inconclusive --std=c++17 --force `
+          --library=std `
+          --library=qt `
+          --suppress=missingIncludeSystem `
           gitLFS-Test/src gitLFS-Test/include
 
 
