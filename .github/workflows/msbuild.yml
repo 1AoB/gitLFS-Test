@@ -49,8 +49,6 @@ jobs:
       run: |
         cppcheck `
           --enable=all --inconclusive --std=c++17 --force `
-          --library=std `
-          --library=qt `
           --suppress=missingIncludeSystem `
           gitLFS-Test/src gitLFS-Test/include
 
