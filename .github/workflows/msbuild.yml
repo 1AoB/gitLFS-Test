@@ -47,18 +47,12 @@ jobs:
 
     - name: Lint with cppcheck
       run: |
-        $cfg = Get-ChildItem -Recurse -Filter std.cfg 'C:\ProgramData\chocolatey\lib\cppcheck' | Select-Object -First 1
-        if (-not $cfg) {
-          Write-Warning 'std.cfg not found in choco install, downloading cfg from upstream...'
-          $zip = "cppcheck-2.14.2-src.zip"
-          Invoke-WebRequest "https://github.com/danmar/cppcheck/archive/refs/tags/2.14.2.zip" -OutFile $zip
-          Expand-Archive $zip -DestinationPath cppcheck-src
-          $cfg = Get-ChildItem -Recurse -Filter std.cfg 'cppcheck-src' | Select-Object -First 1
-        }
-        if (-not $cfg) { Write-Error 'std.cfg still not found; aborting cppcheck'; exit 1 }
-        $env:CPPCHECKDATA = $cfg.DirectoryName
-        Write-Host "Using CPPCHECKDATA=$env:CPPCHECKDATA"
-        cppcheck --enable=all --inconclusive --std=c++17 --force --suppress=missingIncludeSystem gitLFS-Test/src gitLFS-Test/include
+        cppcheck `
+          --data-dir="$env:CPPCHECKDATA" `
+          --enable=all --inconclusive --std=c++17 --force `
+          --suppress=missingIncludeSystem `
+          gitLFS-Test/src gitLFS-Test/include
+
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
