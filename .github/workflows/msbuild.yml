@@ -47,6 +47,10 @@ jobs:
 
     - name: Lint with cppcheck
       run: |
+        $cfg = Get-ChildItem -Recurse -Filter std.cfg 'C:\ProgramData\chocolatey\lib\cppcheck' | Select-Object -First 1
+        if (-not $cfg) { Write-Error 'std.cfg not found; cppcheck installation looks broken.'; exit 1 }
+        $env:CPPCHECKDATA = $cfg.DirectoryName
+        Write-Host "Using CPPCHECKDATA=$env:CPPCHECKDATA"
         cppcheck --enable=all --inconclusive --std=c++17 --force --suppress=missingIncludeSystem gitLFS-Test/src gitLFS-Test/include
 
     - name: Add MSBuild to PATH
