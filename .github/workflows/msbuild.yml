@@ -44,15 +44,15 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    #GITHUB_WORKSPACE 是 GitHub Actions 默认提供的环境变量，无需在 workflow 里设置
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-
     # 静态检查（可选）：使用 MSBuild 内置警告检查
     - name: Lint with MSBuild warnings
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:WarningLevel=4 ${{env.SOLUTION_FILE_PATH}}
+
+    #GITHUB_WORKSPACE 是 GitHub Actions 默认提供的环境变量，无需在 workflow 里设置
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
